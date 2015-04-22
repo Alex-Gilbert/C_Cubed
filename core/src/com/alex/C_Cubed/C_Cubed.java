@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
@@ -33,6 +34,7 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
     Stage ui;
     Table root;
     Table cRoot;
+    Table tRoot;
     TextureRegion image2;
 
     public enum Tools
@@ -89,6 +91,14 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
     private Label NPCLabel;
     private Label SpecialLabel;
 
+    private TextField vertTextField;
+    private TextField edgeTextField;
+    private TextField minSquareTextField;
+    private TextField maxSquareTextField;
+    private TextField testIterationsTextField;
+
+    private Label workingLabel;
+
     float velX, velY;
     boolean flinging = false;
     float initialScale = 1;
@@ -107,7 +117,7 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
     @Override
     public void create ()
     {
-        RandomCubeComplex.RunTest(2, 3, 1, 2, 1000);
+        //RandomCubeComplex.RunTest(8, 20, 3, 6, 1000);
 
         //set UI
         skin = new Skin(Gdx.files.internal("data/uiskin.json"));
@@ -129,6 +139,10 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
         cRoot = new Table();
         cRoot.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         ui.addActor(cRoot);
+
+        tRoot = new Table();
+        tRoot.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        ui.addActor(tRoot);
 
         //Create The Pointer Icon
         pointerID = new Texture(Gdx.files.internal("Icons/PointerIconDown.png"));
@@ -384,8 +398,8 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
 
         //cRoot Actors
         final TextButton button = new TextButton("Calculate", skin, "default");
-        button.setWidth(200f);
-        button.setHeight(200f);
+        button.setWidth(100f);
+        button.setHeight(100f);
         button.addListener(new ChangeListener()
         {
             @Override
@@ -398,14 +412,55 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
         });
 
         GroupPresentationLabel = new Label("Group Presentation: ", skin);
-        GroupPresentationLabel.setFontScale(2,2);
+        GroupPresentationLabel.setFontScale(1,1);
         GroupPresentationLabel.setColor(Color.BLACK);
         NPCLabel = new Label("NPC: ", skin);
-        NPCLabel.setFontScale(2,2);
+        NPCLabel.setFontScale(1,1);
         NPCLabel.setColor(Color.BLACK);
         SpecialLabel = new Label("Special: ", skin);
-        SpecialLabel.setFontScale(2,2);
+        SpecialLabel.setFontScale(1,1);
         SpecialLabel.setColor(Color.BLACK);
+
+        //tRootActors
+        vertTextField = new TextField("", skin);
+        vertTextField.setMessageText("Vertices");
+
+        edgeTextField = new TextField("", skin);
+        edgeTextField.setMessageText("Edges");
+
+        minSquareTextField = new TextField("", skin);
+        minSquareTextField.setMessageText("MinSquares");
+
+        maxSquareTextField = new TextField("", skin);
+        maxSquareTextField.setMessageText("MaxSquares");
+
+        testIterationsTextField = new TextField("", skin);
+        testIterationsTextField.setMessageText("TestIterations");
+
+        workingLabel = new Label("Waiting Test", skin);
+        workingLabel.setColor(Color.WHITE);
+
+        final TextButton testButton = new TextButton("RunTest", skin, "default");
+        testButton.addListener(new ChangeListener()
+        {
+            @Override
+            public void changed(ChangeEvent event, Actor actor){
+                workingLabel.setColor(Color.RED);
+                workingLabel.setText("Working");
+                if(RandomCubeComplex.RunTest(Integer.parseInt(vertTextField.getText()),
+                        Integer.parseInt(edgeTextField.getText()), Integer.parseInt(minSquareTextField.getText()),
+                        Integer.parseInt(maxSquareTextField.getText()), Integer.parseInt(testIterationsTextField.getText())))
+                {
+                    workingLabel.setColor(Color.WHITE);
+                    workingLabel.setText("Test Finished");
+                }
+                else
+                {
+                    workingLabel.setColor(Color.RED);
+                    workingLabel.setText("There was an error");
+                }
+            }
+        });
 
         //Make The tables
         root.left().bottom();
@@ -438,6 +493,16 @@ public class C_Cubed implements ApplicationListener, InputProcessor, GestureList
         cRoot.add(NPCLabel);
         cRoot.row();
         cRoot.add(SpecialLabel);
+
+        tRoot.top().right();
+        tRoot.add(vertTextField);
+        tRoot.add(edgeTextField);
+        tRoot.add(minSquareTextField);
+        tRoot.add(maxSquareTextField);
+        tRoot.add(testIterationsTextField);
+        tRoot.row();
+        tRoot.add(testButton);
+        tRoot.add(workingLabel);
 
         //Set data members
         sB = new SpriteBatch();

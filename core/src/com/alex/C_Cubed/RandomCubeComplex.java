@@ -18,6 +18,7 @@ import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.alg.cycle.PatonCycleBase;
 import sun.security.provider.certpath.Vertex;
 
+import java.io.*;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -28,29 +29,61 @@ public class RandomCubeComplex
     private static ArrayList<Square> squares = new ArrayList<Square>();
     private static ArrayList<Square> AllPossibleSquares = new ArrayList<Square>();
 
-    public static void RunTest(int Vertices, int Edges, int MinSquares, int MaxSquares, int Complexes)
+    public static boolean RunTest(int Vertices, int Edges, int MinSquares, int MaxSquares, int Complexes)
     {
-        CubeComplex test;
-        for(int i = 0; i < Complexes; i++)
+        Writer writer = null;
+
+        int numberSpecial = 0;
+        int total = 0;
+
+        boolean toreturn = true;
+
+        try
         {
-            test = RandomCubeComplex(Vertices, Edges, MaxSquares);
-            for(int j = 1; j < 50; j++)
+            String fileName;
+
+            writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream("Test Results.txt"), "utf-8"));
+
+            CubeComplex test;
+            for(int i = 0; i < Complexes; i++)
             {
+                test = RandomCubeComplex(Vertices, Edges, MaxSquares);
+
                 if(test.Squares.size() >= MinSquares)
-                    break;
-
-                CubeComplex cur;
-                cur = RandomCubeComplex(Vertices, Edges, MaxSquares);
-
-                if(cur.Squares.size() > test.Squares.size())
-                    test = cur;
+                {
+                    boolean isSpecial = test.Special();
+                    writer.write("\nTest Case: " + i + '\n' + test.ToString() + "Special: " + isSpecial);
+                    ++total;
+                    if(isSpecial)
+                        ++numberSpecial;
+                }
+                else
+                    --i;
             }
 
-            if(test.Squares.size() >= MinSquares)
-                System.out.println("\nTest Case: " + i + '\n' + test.ToString() + "Special: " + test.Special());
-            else
-                --i;
+            String testResults = "\nVertices: " + Vertices + " Edges: " + Edges + " Min/Max Squares " + MinSquares + "/" + MaxSquares +
+                    " Test Iterations: " + total + "Special Cube Complexes: " + numberSpecial +" Percent Special: " + ((double)numberSpecial/(double)total) * 100;
+
+            writer.write("\nTEST RESULTS!!\n" + testResults);
         }
+        catch (Exception ex)
+        {
+            toreturn = false;
+        }
+        finally
+        {
+            try
+            {
+                writer.close();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        return toreturn;
     }
 
     public static CubeComplex RandomCubeComplex(int Vertices, int Edges, int Squares)
