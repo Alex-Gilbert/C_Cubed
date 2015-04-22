@@ -1,0 +1,5 @@
+<root>
+    <item name='com.badlogic.gdx.scenes.scene2d.ui.TextField'>
+        <annotation name='java.lang.annotation.Deprecated'/>
+    </item>
+</root>
